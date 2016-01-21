@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+
+<head>
+<title>Интерактивная карта РФ</title>
+</head>
+
+
+<style>
+	.build{
+        	fill: none;
+		stroke: #505050;
+		stroke-width: 1;
+	}
+	.build:hover{
+        	fill-opacity:0.5;
+	}
+	#tooltip {
+        	position: absolute;           
+		text-align: left;
+		padding: 20px;             
+		margin: 10px;
+		font: 14px PT Sans;        
+		background: lightsteelblue;   
+		border: 1px;      
+		border-radius: 2px;           
+		pointer-events: none;   
+	}
+	#tooltip h4{
+		margin:0;
+		font-size:18px;
+		text-align:center;
+	}
+	#tooltip{
+        	background:rgba(255,255,255,0.9);
+		border:1px solid grey;
+		border-radius:5px;
+		font-size:14px;
+		width: auto;
+		padding:4px;
+		color:black;
+		opacity:0;
+	}
+	#tooltip table{
+		table-layout:fixed;
+    	}
+	#tooltip tr td{
+		padding:0;
+		margin:0;
+    	}
+	#tooltip tr td:nth-child(1){
+		width:50px;
+	}
+	#tooltip tr td:nth-child(2){
+        	text-align: left;
+	}
+	body {
+        	@import http://webfonts.ru/import/arsenal.css;
+        	@import http://webfonts.ru/import/ptsans.css;        	
+		background-position: left top;
+		background-repeat: repeat;
+	}
+    .fly {
+        float: left;
+        margin: 30px 0 0 50px;
+        font-family: 'Arsenal';
+        font-size: 22px;
+        font-weight: 700;
+        font-style: regular;
+        color: #505050;
+        line-height: 0em;
+        letter-spacing: 0em;
+    }
+    .hfly {
+        float: left;
+        margin: 30px 0 0 50px; 
+        visibility: hidden;
+        font-family: 'Arsenal';
+        font-size: 22px;
+        font-weight: 700;
+        font-style: regular;
+        color: #505050;
+        line-height: 0em;
+        letter-spacing: 0em;
+    }
+    .floatform {
+        float: left;
+        margin-left: 40px; 
+        margin-top: 40px;
+    }
+    .floattext {
+        margin-left: 10px;
+        font-family: 'PT Sans';
+        font-size: 16px;
+        font-weight: 0;
+        font-style: regular;
+        color: #858585;
+        line-height: 0em;
+        letter-spacing: 0em;
+    }
+</style>
+
+<body>
+
+<p class="fly">Интерактивная карта РФ<sup>β</sup></p>
+<p class="hfly">Интерактивная карта РФ<sup>β</sup></p>
+    
+<div style="text-align:center">
+<div id="tooltip"></div> 
+<svg width="1650" height="1000" id="rfmapsvg"></svg> 
+<script src="rfmap.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+	 function tooltipHtml(n, d, r1, r2, c1, c2){	 
+		return "<h4>"+n+"</h4><nobr><p><table>"+
+			"<tr><td><b>Город:</b></td></tr>"+"<tr><td>"+c1+"</td></tr>"+
+			"<tr><td><b>Завод:</b></td></tr>"+"<tr><td>"+r1+"</td></tr>"+
+			"<tr><td><b>Город:</b></td></tr>"+"<tr><td>"+c2+"</td></tr>"+
+            "<tr><td><b>Завод:</b></td></tr>"+"<tr><td>"+r2+"</td></tr>"+
+			"</table></p></nobr>";
+	}
+	
+	var sampleData ={}; 		
+	["YaroslavlOblast", "Bashkortostan", "Tatarstan", "SamaraOblast", "VoronezhOblast", "OmskOblast", "TyumenOblast", "KrasnoyarskKrai", "TulaOblast"]
+		.forEach(function(d){ 
+			var low=Math.round(100*Math.random()), 
+				mid=Math.round(100*Math.random()), 
+				high=Math.round(100*Math.random());
+			sampleData[d]={low:d3.min([low,mid,high]), high:d3.max([low,mid,high]), 
+					avg:Math.round((low+mid+high)/3), color:d3.interpolate("#ffe999", "#ffe57a")(low/100)};
+        
+    ["BelgorodOblast", "BryanskOblast", "KalugaOblast", "KostromaOblast", "KurskOblast", "LipetskOblast", "MoscowOblast", "Moscow", "IvanovoOblast", "OryolOblast", "RyazanOblast", "SmolenskOblast", "TambovOblast", "TverOblast", "VladimirOblast",  "NizhnyNovgorodOblast", "Adygeya", "AstrakhanOblast", "Chechnya", "Dagestan", "Ingushetia", "KabardinoBalkaria", "Kalmykia", "KarachayCherkessia", "KrasnodarKrai", "NorthOssetia", "StavropolKrai", "Rostov Oblast", "VolgogradOblast", "ArkhangelskOblast", "g9481", "NenetsAutDistrict", "ArkhangelskNovaZemlya", "KaliningradOblast", "LeningradOblast", "Karelia", "KomiRep", "MurmanskOblast", "NovgorodOblast", "PskovOblast", "SaintPetersburg", "VologdaOblast", "AmurOblast", "JewishAutOblast", "KamchatkaKrai", "KhabarovskKrai", "MagadanOblast", "path78", "path80", "PrimorskyKrai", "SakhalinOblast", "AltaiRepublic", "AltaiKrai", "Buryatia", "ChitaOblast", "AgaBuryatia", "IrkutskOblast", "UstOrdaBuryatia", "Khakassia", "KemerovoOblast", "NovosibirskOblast", "TomskOblast", "Tuva", "KurganOblast", "SverdlovskOblast", "KhantiaMansia", "YamaloNenetsAutDistrict", "ChelyabinskOblast", "OrenburgOblast", "SaratovOblast", "UlyanovskOblast", "PermKrai", "PenzaOblast", "Udmurtia", "Mordovia", "Chuvashia", "KirovOblast", "MariEl", "NizhnyNovgorodOblast", "SakhaRep", "path47", "path49", "path51", "path53", "path55", "path57", "path59", "path109", "path111", "path113", "ChukotkaAutOkr", "Wrangel Isl", "path99"]
+        .forEach(function(d){
+        var low=Math.round(100*Math.random()), 
+				mid=Math.round(100*Math.random()), 
+				high=Math.round(100*Math.random());
+			sampleData[d]={low:d3.min([low,mid,high]), high:d3.max([low,mid,high]), 
+					avg:Math.round((low+mid+high)/3), color:d3.interpolate("#f1f1f1", "#f1f1f1")(low/100)}; 
+            })
+		
+		});
+    
+
+	rfmap.draw("#rfmapsvg", sampleData, tooltipHtml);
+
+</script>
+
+    
+</body>
